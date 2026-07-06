@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: shopping-cart-db
+    environment:
+      MYSQL_ROOT_PASSWORD: Asus@260422
+      MYSQL_DATABASE: shopping_cart
+    ports:
+      - "3308:3306"
+    restart: always
+    volumes:
+      - shopping-cart-mysql-data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: shopping-cart-app
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/shopping_cart?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Asus@260422
+    restart: on-failure
+    depends_on:
+      - db
+
+volumes:
+  shopping-cart-mysql-data:

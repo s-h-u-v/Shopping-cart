@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            color: #000;
+            background-color: #fff;
+        }
+        h1, h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        /* Page divided by a horizontal line in middle */
+        .divider-line {
+            border: none;
+            border-top: 2px solid #000;
+            margin: 20px 0;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            min-height: 400px;
+        }
+        .pane {
+            width: 48%;
+            box-sizing: border-box;
+        }
+        .vertical-divider {
+            width: 1px;
+            background-color: #000;
+            margin: 0 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #fff;
+        }
+        button {
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #000;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #333;
+        }
+        .remove-btn {
+            background-color: #fff;
+            color: #000;
+        }
+        .remove-btn:hover {
+            background-color: #eee;
+        }
+        .total-container {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-top: 2px solid #000;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Shopping Cart Application</h1>
+    </div>
+    
+    <!-- Divided into 2 parts by a horizontal line in middle -->
+    <hr class="divider-line">
+
+    <div class="container">
+        <!-- Shop Page (Left side) -->
+        <div class="pane">
+            <h2>Shop</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vegetable</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tomato</td>
+                        <td>40.00</td>
+                        <td><button onclick="addToCart('Tomato', 40.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Onion</td>
+                        <td>30.00</td>
+                        <td><button onclick="addToCart('Onion', 30.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Potato</td>
+                        <td>20.00</td>
+                        <td><button onclick="addToCart('Potato', 20.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Brinjal</td>
+                        <td>35.00</td>
+                        <td><button onclick="addToCart('Brinjal', 35.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Capsicum</td>
+                        <td>60.00</td>
+                        <td><button onclick="addToCart('Capsicum', 60.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Ladyfinger</td>
+                        <td>45.00</td>
+                        <td><button onclick="addToCart('Ladyfinger', 45.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Carrot</td>
+                        <td>40.00</td>
+                        <td><button onclick="addToCart('Carrot', 40.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Cabbage</td>
+                        <td>25.00</td>
+                        <td><button onclick="addToCart('Cabbage', 25.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Cauliflower</td>
+                        <td>50.00</td>
+                        <td><button onclick="addToCart('Cauliflower', 50.00)">Add</button></td>
+                    </tr>
+                    <tr>
+                        <td>Spinach</td>
+                        <td>30.00</td>
+                        <td><button onclick="addToCart('Spinach', 30.00)">Add</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Vertical divider line between the two panes -->
+        <div class="vertical-divider"></div>
+
+        <!-- Your Cart Page (Right side) -->
+        <div class="pane">
+            <h2>Your Cart</h2>
+            <table id="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Price (Unit)</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-items">
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Your cart is empty</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="total-container">
+                Total: <span id="cart-total">0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadCart() {
+            try {
+                const response = await fetch('/api/cart');
+                if (response.ok) {
+                    const cartItems = await response.json();
+                    const tbody = document.getElementById('cart-items');
+                    const totalSpan = document.getElementById('cart-total');
+                    
+                    if (cartItems.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Your cart is empty</td></tr>';
+                        totalSpan.innerText = '0.00';
+                        return;
+                    }
+                    
+                    tbody.innerHTML = '';
+                    let total = 0;
+                    
+                    cartItems.forEach(item => {
+                        const subtotal = item.quantity * item.price;
+                        total += subtotal;
+                        
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${item.name}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price.toFixed(2)}</td>
+                            <td>${subtotal.toFixed(2)}</td>
+                            <td><button class="remove-btn" onclick="removeFromCart(${item.id})">Remove</button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    
+                    totalSpan.innerText = total.toFixed(2);
+                } else {
+                    console.error('Failed to load cart items');
+                }
+            } catch (err) {
+                console.error('Error fetching cart:', err);
+            }
+        }
+
+        async function addToCart(name, price) {
+            try {
+                const response = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, price })
+                });
+                if (response.ok) {
+                    loadCart();
+                } else {
+                    alert('Error adding item to cart');
+                }
+            } catch (err) {
+                console.error('Error adding to cart:', err);
+            }
+        }
+
+        async function removeFromCart(id) {
+            try {
+                const response = await fetch(`/api/cart/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    loadCart();
+                } else {
+                    alert('Error removing item from cart');
+                }
+            } catch (err) {
+                console.error('Error removing from cart:', err);
+            }
+        }
+
+        // Load cart on page load
+        window.addEventListener('DOMContentLoaded', loadCart);
+    </script>
+</body>
+</html>
